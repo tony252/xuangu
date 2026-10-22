@@ -249,7 +249,7 @@ Expected: tests, asset build, deploy and production verification jobs all succee
 
 - [ ] **Step 3: Verify the public contracts**
 
-Check `https://xuangu.alixjd.com/`, `/api/status`, `/api/history` and an allow-listed `/api/live` compatibility request. Expected:
+Check `https://tony252.ccwu.cc/`, `/api/status`, `/api/history` and an allow-listed `/api/live` compatibility request. Expected:
 
 - root and API responses return HTTP 200;
 - `/api/status` reports `scheduled_snapshot`, `device_dependency=false`, the four planned times, `snapshot_as_of` and `next_refresh`;

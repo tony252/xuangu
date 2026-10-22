@@ -24,7 +24,7 @@ def configure(environ: Mapping[str, str] | None = None, *, runner=subprocess.run
     try:
         completed = runner(
             ["npx", "--no-install", "wrangler", "secret", "put",
-             "GITHUB_WORKFLOW_DISPATCH_TOKEN", "--name", "xuangu"],
+             "GITHUB_WORKFLOW_DISPATCH_TOKEN", "--name", "xuangu-tony252"],
             input=token + "\n", text=True, capture_output=True, timeout=60,
             env=child_env, check=False,
         )

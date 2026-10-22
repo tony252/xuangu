@@ -293,4 +293,4 @@ Use GitHub workflow dispatch against `main` with the default archived date range
 
 - [ ] **Step 4: Verify the chained deployment**
 
-Wait for the replay workflow, CI, and explicit Cloudflare deployment workflow to complete. Verify `https://xuangu.alixjd.com/api/latest-summary` exposes the matching `analysis_models.historical_replay.artifact_sha256`, and confirm the Model tab shows the research-only replay card with no executable authority.
+Wait for the replay workflow, CI, and explicit Cloudflare deployment workflow to complete. Verify `https://tony252.ccwu.cc/api/latest-summary` exposes the matching `analysis_models.historical_replay.artifact_sha256`, and confirm the Model tab shows the research-only replay card with no executable authority.

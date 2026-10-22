@@ -227,7 +227,7 @@ def _response_text(response: Any) -> str:
 
 def _default_fetcher(method: str, url: str, **kwargs: Any) -> requests.Response:
     headers = {
-        "User-Agent": "xuangu-event-audit/1.0 contact: xuangu.alixjd.com",
+        "User-Agent": "xuangu-event-audit/1.0 contact: tony252.ccwu.cc",
         "Accept": "application/json,text/html;q=0.9,*/*;q=0.8",
         **(kwargs.pop("headers", {}) or {}),
     }

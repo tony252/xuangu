@@ -103,7 +103,7 @@ class WorkerApiContractTests(unittest.TestCase):
             }};
 
             const statusResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/status"),
+              new Request("https://tony252.ccwu.cc/api/status"),
               env,
             );
             assert.equal(statusResponse.status, 200);
@@ -177,7 +177,7 @@ class WorkerApiContractTests(unittest.TestCase):
             assert.match(statusResponse.headers.get("permissions-policy"), /camera=\\(\\)/);
 
             const forceResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/pick?force=1"),
+              new Request("https://tony252.ccwu.cc/api/pick?force=1"),
               env,
             );
             assert.equal(forceResponse.status, 409);
@@ -186,19 +186,19 @@ class WorkerApiContractTests(unittest.TestCase):
             assert.equal(force.recompute_supported, false);
 
             const redirect = await worker.fetch(
-              new Request("http://xuangu.alixjd.com/api/status"),
+              new Request("http://tony252.ccwu.cc/api/status"),
               env,
             );
             assert.equal(redirect.status, 308);
-            assert.equal(redirect.headers.get("location"), "https://xuangu.alixjd.com/api/status");
+            assert.equal(redirect.headers.get("location"), "https://tony252.ccwu.cc/api/status");
 
             const localResponse = await worker.fetch(
-              new Request("http://xuangu.alixjd.com/api/status"),
+              new Request("http://tony252.ccwu.cc/api/status"),
               {{ ...env, LOCAL_DEV: "1" }},
             );
             assert.equal(localResponse.status, 200);
 
-            const page = await worker.fetch(new Request("https://xuangu.alixjd.com/"), env);
+            const page = await worker.fetch(new Request("https://tony252.ccwu.cc/"), env);
             assert.equal(page.status, 200);
             assert.equal(page.headers.get("referrer-policy"), "strict-origin-when-cross-origin");
             """
@@ -322,7 +322,7 @@ class WorkerApiContractTests(unittest.TestCase):
 
             calls.length = 0;
             const status = await (await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/status"), env,
+              new Request("https://tony252.ccwu.cc/api/status"), env,
             )).json();
             assert.equal(status.production_action, "QUALIFIED_PICK");
             assert.equal(status.qualification_id, "qual_0123456789abcdef01234567");
@@ -336,7 +336,7 @@ class WorkerApiContractTests(unittest.TestCase):
 
             calls.length = 0;
             const live = await (await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"), env,
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"), env,
             )).json();
             assert.equal(live.ok, true);
             assert.equal(live.price, 213);
@@ -350,7 +350,7 @@ class WorkerApiContractTests(unittest.TestCase):
 
             calls.length = 0;
             const latestResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/latest"), env,
+              new Request("https://tony252.ccwu.cc/api/latest"), env,
             );
             assert.equal((await latestResponse.json()).full_marker, true);
             assert.equal(latestResponse.headers.get("cache-control"), "no-store");
@@ -358,14 +358,14 @@ class WorkerApiContractTests(unittest.TestCase):
 
             calls.length = 0;
             const immutable = await worker.fetch(
-              new Request(`https://xuangu.alixjd.com/api/pick?snapshot=${{snapshotKey}}`), env,
+              new Request(`https://tony252.ccwu.cc/api/pick?snapshot=${{snapshotKey}}`), env,
             );
             assert.equal((await immutable.json()).full_marker, true);
             assert.deepEqual(calls, [`/data/picks/${{snapshotKey}}`]);
 
             calls.length = 0;
             const summary = await (await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/latest-summary"), env,
+              new Request("https://tony252.ccwu.cc/api/latest-summary"), env,
             )).json();
             assert.equal(summary.latest.production_action, "QUALIFIED_PICK");
             assert.deepEqual(calls, [
@@ -384,7 +384,7 @@ class WorkerApiContractTests(unittest.TestCase):
               return new Response("missing", {{ status: 404 }});
             }} }} }};
             const missingRuntime = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/status"), failClosedEnv,
+              new Request("https://tony252.ccwu.cc/api/status"), failClosedEnv,
             );
             assert.equal(missingRuntime.status, 503);
             assert.deepEqual(failClosedCalls, [
@@ -393,7 +393,7 @@ class WorkerApiContractTests(unittest.TestCase):
             ]);
             failClosedCalls.length = 0;
             const missingLiveIndex = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"), failClosedEnv,
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"), failClosedEnv,
             );
             assert.equal(missingLiveIndex.status, 503);
             assert.deepEqual(failClosedCalls, [
@@ -990,7 +990,7 @@ class WorkerApiContractTests(unittest.TestCase):
             }};
             await worker.scheduled(controller, env, {{ waitUntil() {{}} }});
             assert.equal(requests.length, 1);
-            assert.equal(requests[0].input, "https://api.github.com/repos/dzhdingzihang/xuangu/actions/workflows/deploy-worker.yml/dispatches");
+            assert.equal(requests[0].input, "https://api.github.com/repos/tony252/xuangu/actions/workflows/deploy-worker.yml/dispatches");
             assert.equal(requests[0].init.headers.authorization, "Bearer secret-token");
             const body = JSON.parse(requests[0].init.body);
             assert.equal(body.ref, "main");
@@ -1030,17 +1030,15 @@ class WorkerApiContractTests(unittest.TestCase):
             """
         )
 
-    def test_wrangler_uses_one_cron_with_runtime_primary_watchdog_and_dst_filtering(self) -> None:
+    def test_wrangler_defers_scheduling_to_github_actions(self) -> None:
         config = json.loads((ROOT / "wrangler.jsonc").read_text(encoding="utf-8"))
-        self.assertEqual(config["vars"]["CLOUDFLARE_SCHEDULER_ENABLED"], "1")
-        crons = config["triggers"]["crons"]
+        self.assertEqual(config["vars"]["CLOUDFLARE_SCHEDULER_ENABLED"], "0")
+        self.assertNotIn("triggers", config)
+        self.assertEqual(config["name"], "xuangu-tony252")
         self.assertEqual(
-            crons,
-            [
-                "17,47 0,2,4,7,8,12,14,15,20,21 * * MON-FRI",
-            ],
+            config["routes"],
+            [{"pattern": "tony252.ccwu.cc/*", "zone_name": "tony252.ccwu.cc"}],
         )
-        self.assertEqual(len(crons), 1)
 
     def test_all_v4_rule_qualified_candidates_are_live_allowlisted_and_summarized(self) -> None:
         run_node(
@@ -1207,28 +1205,28 @@ class WorkerApiContractTests(unittest.TestCase):
             }});
 
             const secondaryResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=MSFT"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=MSFT"),
               envFor(latest),
             );
             assert.equal(secondaryResponse.status, 200);
             assert.equal((await secondaryResponse.json()).code, "MSFT");
 
             const crossMarketResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=hk&code=0700.HK"),
+              new Request("https://tony252.ccwu.cc/api/live?market=hk&code=0700.HK"),
               envFor(latest),
             );
             assert.equal(crossMarketResponse.status, 200);
             assert.equal((await crossMarketResponse.json()).market, "hk");
 
             const unrelatedResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=TSLA"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=TSLA"),
               envFor(latest),
             );
             assert.equal(unrelatedResponse.status, 404);
             assert.equal((await unrelatedResponse.json()).error, "LIVE_CODE_NOT_IN_CURRENT_SNAPSHOT");
 
             const summaryResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/latest-summary"),
+              new Request("https://tony252.ccwu.cc/api/latest-summary"),
               envFor(latest),
             );
             assert.equal(summaryResponse.status, 200);
@@ -1254,21 +1252,21 @@ class WorkerApiContractTests(unittest.TestCase):
               production_decision: v2Decision,
             }};
             const rejectedResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=MSFT"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=MSFT"),
               envFor(mismatched),
             );
             assert.equal(rejectedResponse.status, 404);
             assert.equal((await rejectedResponse.json()).error, "LIVE_CODE_NOT_IN_CURRENT_SNAPSHOT");
 
             const mismatchedStatusResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/status"),
+              new Request("https://tony252.ccwu.cc/api/status"),
               envFor(mismatched),
             );
             const mismatchedStatus = await mismatchedStatusResponse.json();
             assert.equal(mismatchedStatus.production_action, "NO_QUALIFIED_PICK");
             assert.equal(mismatchedStatus.qualification_id, null);
             const mismatchedSummaryResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/latest-summary"),
+              new Request("https://tony252.ccwu.cc/api/latest-summary"),
               envFor(mismatched),
             );
             const mismatchedSummary = (await mismatchedSummaryResponse.json()).latest;
@@ -1277,7 +1275,7 @@ class WorkerApiContractTests(unittest.TestCase):
 
             const archivedV2 = {{ ...mismatched, model_version: "smart-selector-2026-08-26.1-candidate-rule" }};
             const archivedResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=MSFT"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=MSFT"),
               envFor(archivedV2),
             );
             assert.equal(archivedResponse.status, 200);
@@ -1287,19 +1285,19 @@ class WorkerApiContractTests(unittest.TestCase):
               model_version: "smart-selector-2026-08-26.1-candidate-rule",
             }};
             const oldModelWithV3Response = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"),
               envFor(oldModelWithV3),
             );
             assert.equal(oldModelWithV3Response.status, 404);
             const oldModelWithV3Status = await (
-              await worker.fetch(new Request("https://xuangu.alixjd.com/api/status"), envFor(oldModelWithV3))
+              await worker.fetch(new Request("https://tony252.ccwu.cc/api/status"), envFor(oldModelWithV3))
             ).json();
             assert.equal(oldModelWithV3Status.production_action, "NO_QUALIFIED_PICK");
 
             const missingModelWithV3 = structuredClone(latest);
             delete missingModelWithV3.model_version;
             const missingModelWithV3Response = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"),
               envFor(missingModelWithV3),
             );
             assert.equal(missingModelWithV3Response.status, 404);
@@ -1307,7 +1305,7 @@ class WorkerApiContractTests(unittest.TestCase):
             const failedQuality = structuredClone(latest);
             failedQuality.production_decision.qualified_candidates[1].track_evaluations[1].status = "FAIL";
             const failedQualityResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=MSFT"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=MSFT"),
               envFor(failedQuality),
             );
             assert.equal(failedQualityResponse.status, 404);
@@ -1315,7 +1313,7 @@ class WorkerApiContractTests(unittest.TestCase):
             const passWithBlocker = structuredClone(latest);
             passWithBlocker.production_decision.qualified_candidates[1].track_evaluations[1].blocker_codes = ["IMPOSSIBLE_PASS_BLOCKER"];
             const passWithBlockerResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=MSFT"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=MSFT"),
               envFor(passWithBlocker),
             );
             assert.equal(passWithBlockerResponse.status, 404);
@@ -1324,7 +1322,7 @@ class WorkerApiContractTests(unittest.TestCase):
             eventWithoutEvidence.production_decision.primary.verified_positive_event_ids = [];
             eventWithoutEvidence.production_decision.qualified_candidates[0].verified_positive_event_ids = [];
             const eventWithoutEvidenceResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"),
               envFor(eventWithoutEvidence),
             );
             assert.equal(eventWithoutEvidenceResponse.status, 404);
@@ -1332,7 +1330,7 @@ class WorkerApiContractTests(unittest.TestCase):
             const evilMirror = structuredClone(latest);
             evilMirror.production_decision.qualified_candidates[1].name = "EVIL MIRROR";
             const evilMirrorResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=MSFT"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=MSFT"),
               envFor(evilMirror),
             );
             assert.equal(evilMirrorResponse.status, 404);
@@ -1342,7 +1340,7 @@ class WorkerApiContractTests(unittest.TestCase):
               lowScorePrimary.production_decision.qualified_candidates[2],
             );
             const lowScorePrimaryResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"),
               envFor(lowScorePrimary),
             );
             assert.equal(lowScorePrimaryResponse.status, 404);
@@ -1356,7 +1354,7 @@ class WorkerApiContractTests(unittest.TestCase):
               reorderedEvaluation.production_decision.evaluated_candidates[1],
             ];
             const reorderedEvaluationResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"),
               envFor(reorderedEvaluation),
             );
             assert.equal(reorderedEvaluationResponse.status, 404);
@@ -1364,7 +1362,7 @@ class WorkerApiContractTests(unittest.TestCase):
             const highScoreFakeRejected = structuredClone(latest);
             highScoreFakeRejected.production_decision.evaluated_candidates[0].status = "REJECTED";
             const highScoreFakeRejectedResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"),
               envFor(highScoreFakeRejected),
             );
             assert.equal(highScoreFakeRejectedResponse.status, 404);
@@ -1382,7 +1380,7 @@ class WorkerApiContractTests(unittest.TestCase):
               row.candidate_snapshot.data_quality.score = 90;
             }}
             const fakeQualityPassResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=MSFT"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=MSFT"),
               envFor(fakeQualityPass),
             );
             assert.equal(fakeQualityPassResponse.status, 404);
@@ -1392,7 +1390,7 @@ class WorkerApiContractTests(unittest.TestCase):
             delete secondaryQuoteMissing.production_decision.qualified_candidates[1].candidate_snapshot.realtime;
             delete secondaryQuoteMissing.production_decision.evaluated_candidates[1].candidate_snapshot.realtime;
             const secondaryQuoteMissingResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"),
               envFor(secondaryQuoteMissing),
             );
             assert.equal(secondaryQuoteMissingResponse.status, 404);
@@ -1456,7 +1454,7 @@ class WorkerApiContractTests(unittest.TestCase):
             ];
             for (const [market, inputCode, expectedCode, expectedUnit] of cases) {{
               const response = await worker.fetch(new Request(
-                `https://xuangu.alixjd.com/api/live?market=${{market}}&code=${{encodeURIComponent(inputCode)}}`,
+                `https://tony252.ccwu.cc/api/live?market=${{market}}&code=${{encodeURIComponent(inputCode)}}`,
               ), env);
               assert.equal(response.status, 200, `${{market}}:${{inputCode}}`);
               const payload = await response.json();
@@ -1551,7 +1549,7 @@ class WorkerApiContractTests(unittest.TestCase):
             }};
 
             const aResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=a_share&code=603228"),
+              new Request("https://tony252.ccwu.cc/api/live?market=a_share&code=603228"),
               env,
             );
             assert.equal(aResponse.status, 200);
@@ -1573,7 +1571,7 @@ class WorkerApiContractTests(unittest.TestCase):
             assert.equal(aShare.kline.length, 1);
 
             const usResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"),
               env,
             );
             assert.equal(usResponse.status, 200);
@@ -1587,7 +1585,7 @@ class WorkerApiContractTests(unittest.TestCase):
             assert.equal(us.is_realtime, false);
 
             const hkResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=hk&code=0700.HK"),
+              new Request("https://tony252.ccwu.cc/api/live?market=hk&code=0700.HK"),
               env,
             );
             assert.equal(hkResponse.status, 200);
@@ -1650,7 +1648,7 @@ class WorkerApiContractTests(unittest.TestCase):
             }};
 
             const invalidMarket = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=crypto&code=AAPL"), env,
+              new Request("https://tony252.ccwu.cc/api/live?market=crypto&code=AAPL"), env,
             );
             assert.equal(invalidMarket.status, 400);
             const invalidMarketPayload = await invalidMarket.json();
@@ -1661,22 +1659,22 @@ class WorkerApiContractTests(unittest.TestCase):
             }}
 
             const invalidCode = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=../AAPL"), env,
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=../AAPL"), env,
             );
             assert.equal(invalidCode.status, 400);
             assert.equal((await invalidCode.json()).error, "INVALID_CODE");
 
             const outsideSnapshot = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=MSFT"), env,
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=MSFT"), env,
             );
             assert.equal(outsideSnapshot.status, 404);
             assert.equal((await outsideSnapshot.json()).error, "LIVE_CODE_NOT_IN_CURRENT_SNAPSHOT");
 
             const first = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=aapl"), env,
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=aapl"), env,
             );
             const second = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"), env,
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"), env,
             );
             assert.equal(first.status, 200);
             assert.equal(second.status, 200);
@@ -1706,7 +1704,7 @@ class WorkerApiContractTests(unittest.TestCase):
               }},
             }};
             const limited = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL", {{
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL", {{
                 headers: {{ "cf-connecting-ip": "203.0.113.8" }},
               }}),
               limitedEnv,
@@ -1754,7 +1752,7 @@ class WorkerApiContractTests(unittest.TestCase):
 
             for (const code of ["AAPL", "MSFT", "GOOG", "AMZN"]) {{
               const response = await worker.fetch(
-                new Request(`https://xuangu.alixjd.com/api/live?market=us&code=${{code}}`),
+                new Request(`https://tony252.ccwu.cc/api/live?market=us&code=${{code}}`),
                 env,
               );
               assert.equal(response.status, 502, code);
@@ -1798,7 +1796,7 @@ class WorkerApiContractTests(unittest.TestCase):
               return new Response(JSON.stringify(latest), {{ headers: {{ "content-type": "application/json" }} }});
             }} }};
             const limiterFailure = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"),
+              new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"),
               {{
                 ALLOW_LEGACY_FULL_SNAPSHOT_FALLBACK: "1",
                 ASSETS: validAssets,
@@ -1817,7 +1815,7 @@ class WorkerApiContractTests(unittest.TestCase):
               {{ async fetch() {{ return new Response("[]", {{ status: 200 }}); }} }},
             ]) {{
               const response = await worker.fetch(
-                new Request("https://xuangu.alixjd.com/api/live?market=us&code=AAPL"),
+                new Request("https://tony252.ccwu.cc/api/live?market=us&code=AAPL"),
                 {{ ASSETS: assets }},
               );
               assert.equal(response.status, 503);
@@ -1830,7 +1828,7 @@ class WorkerApiContractTests(unittest.TestCase):
             }}
 
             const statusFailure = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/status"),
+              new Request("https://tony252.ccwu.cc/api/status"),
               {{ ASSETS: {{ async fetch() {{ return new Response("not-json"); }} }} }},
             );
             assert.equal(statusFailure.status, 503);
@@ -1902,7 +1900,7 @@ class WorkerApiContractTests(unittest.TestCase):
             }};
 
             const response = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/history?limit=5"),
+              new Request("https://tony252.ccwu.cc/api/history?limit=5"),
               env,
             );
             assert.equal(response.status, 200);
@@ -1927,7 +1925,7 @@ class WorkerApiContractTests(unittest.TestCase):
             assert.equal(payload.meta.observation_performance.authorizes_production, false);
 
             const rawResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/history?view=raw&limit=2"),
+              new Request("https://tony252.ccwu.cc/api/history?view=raw&limit=2"),
               env,
             );
             const rawPayload = await rawResponse.json();
@@ -1974,7 +1972,7 @@ class WorkerApiContractTests(unittest.TestCase):
               }},
             }};
             const evaluatedResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/history?limit=1"), env,
+              new Request("https://tony252.ccwu.cc/api/history?limit=1"), env,
             );
             const evaluatedPayload = await evaluatedResponse.json();
             assert.equal(evaluatedPayload.history.length, 1);
@@ -2037,7 +2035,7 @@ class WorkerApiContractTests(unittest.TestCase):
             }};
             manifest.summaries = [invalidSettlement, laterNoPickSameDay];
             const invalidResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/history?limit=5"),
+              new Request("https://tony252.ccwu.cc/api/history?limit=5"),
               env,
             );
             const invalidPayload = await invalidResponse.json();
@@ -2048,7 +2046,7 @@ class WorkerApiContractTests(unittest.TestCase):
             invalidSettlement.outcome.exit_at = "2026-09-03T18:00:00Z";
             invalidSettlement.outcome.settled_at = "2026-09-03T19:00:00Z";
             const validResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/history?limit=5"),
+              new Request("https://tony252.ccwu.cc/api/history?limit=5"),
               env,
             );
             const validPayload = await validResponse.json();
@@ -2056,7 +2054,7 @@ class WorkerApiContractTests(unittest.TestCase):
             assert.equal(validPayload.meta.missing_outcome_count, 0);
 
             const unavailableResponse = await worker.fetch(
-              new Request("https://xuangu.alixjd.com/api/history?limit=5"),
+              new Request("https://tony252.ccwu.cc/api/history?limit=5"),
               {{ ASSETS: {{ fetch: async () => new Response("missing", {{ status: 404 }}) }} }},
             );
             assert.equal(unavailableResponse.status, 503);

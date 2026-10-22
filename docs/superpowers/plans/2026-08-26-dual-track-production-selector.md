@@ -259,7 +259,7 @@ Expected: all tests pass with no diff whitespace errors or JavaScript syntax fai
 
 Run: `git add production_rule_model.py server.py scripts/validate_snapshot.py scripts/build_worker_assets.py src/index.js static/app.js README.md tests docs/superpowers/plans/2026-08-26-dual-track-production-selector.md && git commit -m "feat: add dual-track qualified candidates"`
 
-Run: `git push git@github.com:dzhdingzihang/xuangu.git HEAD:main`
+Run: `git push git@github.com:tony252/xuangu.git HEAD:main`
 
 Expected: the Cloudflare deploy workflow completes successfully.
 
@@ -278,4 +278,4 @@ Expected live checks:
 
 - [ ] **Step 5: Verify the rendered site**
 
-Open `https://xuangu.alixjd.com/`, confirm the candidate tab shows each qualified stock with its track badge, the model tab explains both tracks, and the history tab opens the immutable V3 snapshot without a blank state.
+Open `https://tony252.ccwu.cc/`, confirm the candidate tab shows each qualified stock with its track badge, the model tab explains both tracks, and the history tab opens the immutable V3 snapshot without a blank state.

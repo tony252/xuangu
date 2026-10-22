@@ -202,7 +202,7 @@ Expected: all tests pass, Worker assets build, and no whitespace errors appear.
 ```bash
 git add .github/workflows/deploy-worker.yml scripts/schedule_gate.py src/index.js scripts/verify_deployment.py static/app.js static/index.html README.md tests docs/superpowers/plans/2026-08-23-multi-market-refresh-checkpoints.md
 git commit -m "feat: add multi-market refresh checkpoints"
-git push git@github.com:dzhdingzihang/xuangu.git HEAD:main
+git push git@github.com:tony252/xuangu.git HEAD:main
 ```
 
 - [ ] **Step 3: Dispatch one full cloud refresh and wait for deploy and archive jobs**
@@ -213,6 +213,6 @@ Expected: both `deploy` and `archive` conclude `success`.
 
 - [ ] **Step 4: Verify the production status contract**
 
-Run: `curl -fsS https://xuangu.alixjd.com/api/status | jq '{schedule_primary_checkpoints,schedule_fallback_checkpoints,next_refresh,device_dependency,freshness_state}'`
+Run: `curl -fsS https://tony252.ccwu.cc/api/status | jq '{schedule_primary_checkpoints,schedule_fallback_checkpoints,next_refresh,device_dependency,freshness_state}'`
 
 Expected: seven primary checkpoints, seven fallback checkpoints, `device_dependency=false`, and a non-null `next_refresh` matching the next exact invocation.

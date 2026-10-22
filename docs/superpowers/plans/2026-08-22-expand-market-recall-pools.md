@@ -261,6 +261,6 @@ Expected: GitHub Actions tests, generates/deploys the Worker, and production ver
 
 - [ ] **Step 5: Verify production snapshot and UI**
 
-Run: `python scripts/verify_deployment.py data/picks/latest.json --base-url https://xuangu.alixjd.com`
+Run: `python scripts/verify_deployment.py data/picks/latest.json --base-url https://tony252.ccwu.cc`
 
 Expected: deployed snapshot identity matches, all published candidates have valid strict realtime provenance, and the page displays target/actual/deep counts truthfully.

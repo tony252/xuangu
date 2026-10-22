@@ -132,11 +132,11 @@ Expected: 快照契约通过；A 股显示基础评分接近/等于 300、技术
 
 Run: `git add server.py static/app.js scripts/validate_snapshot.py scripts/schedule_gate.py tests README.md docs/superpowers/plans/2026-08-23-a-share-300-full-score.md && git commit -m "feat: score full A-share recall pool"`
 
-Run: `git push git@github.com:dzhdingzihang/xuangu.git HEAD:main`
+Run: `git push git@github.com:tony252/xuangu.git HEAD:main`
 
 Expected: GitHub Actions 构建和 Cloudflare 发布成功。
 
 **Step 4: Verify production**
 
-- 检查 `https://xuangu.alixjd.com/api/status` 与最新快照。
+- 检查 `https://tony252.ccwu.cc/api/status` 与最新快照。
 - 断言线上漏斗字段存在、计数自洽、页面可打开且显示六层口径。

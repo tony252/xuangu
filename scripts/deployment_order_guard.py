@@ -157,7 +157,7 @@ def write_output(result: Mapping[str, Any]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("path", nargs="?", type=pathlib.Path, default=pathlib.Path("data/picks/latest.json"))
-    parser.add_argument("--base-url", default="https://xuangu.alixjd.com")
+    parser.add_argument("--base-url", default="https://tony252.ccwu.cc")
     args = parser.parse_args()
     write_output(evaluate_path(args.path, base_url=args.base_url))
 

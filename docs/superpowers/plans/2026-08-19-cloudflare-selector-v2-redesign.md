@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Ship a five-tab, evidence-first A-share/HK/US stock-selection dashboard on `xuangu.alixjd.com`, preserve the current production decisions, add a truthful V2 shadow score and candidate-lineage contract, and make Cloudflare Workers the only public runtime.
+**Goal:** Ship a five-tab, evidence-first A-share/HK/US stock-selection dashboard on `tony252.ccwu.cc`, preserve the current production decisions, add a truthful V2 shadow score and candidate-lineage contract, and make Cloudflare Workers the only public runtime.
 
 **Architecture:** `server.py` remains the deterministic snapshot generator executed by scheduled GitHub Actions; it writes immutable JSON snapshots that `scripts/build_worker_assets.py` bakes into Cloudflare Worker assets. The legacy score and BUY/NO_TRADE gate stay active while a new pure-function V2 layer adds deduplicated factor groups, market regime, data quality, decision gates, source lineage, event evidence, and within-market rank. The browser is a dependency-free five-tab SPA that renders real snapshot fields, refreshes only live prices, and never pretends that a Worker request recomputes the model.
 
@@ -424,7 +424,7 @@ Run the `Deploy Cloudflare Worker` workflow with `workflow_dispatch` so the new 
 
 - [ ] **Step 4: Verify the live API and five-tab site**
 
-Confirm HTTPS, `/api/status`, `/api/latest`, `/api/history`, `/api/live`, schema/model version, `recompute_supported: false`, and the five tab interactions at `https://xuangu.alixjd.com/`.
+Confirm HTTPS, `/api/status`, `/api/latest`, `/api/history`, `/api/live`, schema/model version, `recompute_supported: false`, and the five tab interactions at `https://tony252.ccwu.cc/`.
 
 - [ ] **Step 5: Report the Render boundary**
 

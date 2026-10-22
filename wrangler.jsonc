@@ -1,16 +1,12 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "xuangu",
+  "name": "xuangu-tony252",
+  "account_id": "22dc4c763c65296231e471b46a70764e",
   "main": "./src/index.js",
   "compatibility_date": "2026-05-29",
   "workers_dev": false,
   "vars": {
-    "CLOUDFLARE_SCHEDULER_ENABLED": "1"
-  },
-  "triggers": {
-    "crons": [
-      "17,47 0,2,4,7,8,12,14,15,20,21 * * MON-FRI"
-    ]
+    "CLOUDFLARE_SCHEDULER_ENABLED": "0"
   },
   "assets": {
     "directory": "./public",
@@ -20,7 +16,7 @@
   "ratelimits": [
     {
       "name": "LIVE_RATE_LIMITER",
-      "namespace_id": "73142201",
+      "namespace_id": "2026102201",
       "simple": {
         "limit": 90,
         "period": 60
@@ -29,8 +25,8 @@
   ],
   "routes": [
     {
-      "pattern": "xuangu.alixjd.com/*",
-      "zone_name": "alixjd.com"
+      "pattern": "tony252.ccwu.cc/*",
+      "zone_name": "tony252.ccwu.cc"
     }
   ]
 }

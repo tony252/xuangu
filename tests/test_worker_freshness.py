@@ -230,7 +230,7 @@ class WorkerFreshnessTests(unittest.TestCase):
               }} }},
             }};
             const response = await module.default.fetch(
-              new Request("https://xuangu.alixjd.com/api/status"),
+              new Request("https://tony252.ccwu.cc/api/status"),
               env,
             );
             const status = await response.json();

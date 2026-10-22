@@ -64,7 +64,7 @@ const WORKER_UI_EVENTS_PATH = "/data/picks/ui-events.json";
 const WORKER_LIVE_INDEX_CANDIDATE_LIMIT = 90;
 const WORKER_LIVE_INDEX_BYTE_SIZE_LIMIT = 524_288;
 const MAX_QUALIFIED_SUMMARY_CANDIDATES = 20;
-const GITHUB_WORKFLOW_DISPATCH_URL = "https://api.github.com/repos/dzhdingzihang/xuangu/actions/workflows/deploy-worker.yml/dispatches";
+const GITHUB_WORKFLOW_DISPATCH_URL = "https://api.github.com/repos/tony252/xuangu/actions/workflows/deploy-worker.yml/dispatches";
 const CLOUDFLARE_SCHEDULED_CRONS = new Map([
   // One configured trigger preserves the account-wide cron quota. Runtime
   // filtering keeps only the original primary/watchdog slots. Old expressions

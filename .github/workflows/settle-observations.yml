@@ -135,12 +135,12 @@ jobs:
               cd "${settlement_tree}"
               npm ci
               python scripts/verify_deployment.py data/picks/latest.json \
-                --base-url https://xuangu.alixjd.com \
+                --base-url https://tony252.ccwu.cc \
                 --adopt-newer-live
               python scripts/build_worker_assets.py
               rollback_target="${RUNNER_TEMP}/history-rollback-${GITHUB_RUN_ID}.json"
               CLOUDFLARE_API_TOKEN='${{ secrets.CLOUDFLARE_API_TOKEN }}' \
-                npx --no-install wrangler deployments status --name xuangu --json > "${rollback_target}"
+                npx --no-install wrangler deployments status --name xuangu-tony252 --json > "${rollback_target}"
               rollback_version="$(python - "${rollback_target}" <<'PY'
           import json
           import pathlib
@@ -169,11 +169,11 @@ jobs:
                   echo "History publication failed; restoring Worker ${rollback_version}" >&2
                   CLOUDFLARE_API_TOKEN='${{ secrets.CLOUDFLARE_API_TOKEN }}' \
                     npx --no-install wrangler rollback "${rollback_version}" \
-                    --name xuangu --yes \
+                    --name xuangu-tony252 --yes \
                     --message "rollback failed history settlement github:${GITHUB_SHA} run:${GITHUB_RUN_ID}"
                   restored="${RUNNER_TEMP}/history-rollback-result-${GITHUB_RUN_ID}.json"
                   CLOUDFLARE_API_TOKEN='${{ secrets.CLOUDFLARE_API_TOKEN }}' \
-                    npx --no-install wrangler deployments status --name xuangu --json > "${restored}"
+                    npx --no-install wrangler deployments status --name xuangu-tony252 --json > "${restored}"
                   EXPECTED_ROLLBACK_VERSION="${rollback_version}" python - "${restored}" <<'PY'
           import json
           import os
@@ -204,7 +204,7 @@ jobs:
                 npx --no-install wrangler deploy \
                 --message "history settlement github:${GITHUB_SHA} run:${GITHUB_RUN_ID}"
               python scripts/verify_deployment.py public/data/picks/latest.json \
-                --base-url https://xuangu.alixjd.com \
+                --base-url https://tony252.ccwu.cc \
                 --attempts 8 --delay-seconds 8 --timeout-seconds 15
               python - <<'PY'
           import json
@@ -221,7 +221,7 @@ jobs:
           for attempt in range(1, 13):
               try:
                   request = urllib.request.Request(
-                      "https://xuangu.alixjd.com/api/history?page=1&limit=1",
+                      "https://tony252.ccwu.cc/api/history?page=1&limit=1",
                       headers={
                           "Accept": "application/json",
                           "Cache-Control": "no-cache",

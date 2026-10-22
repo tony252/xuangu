@@ -1,2 +1,2 @@
 #!/bin/zsh
-open "https://xuangu.alixjd.com"
+open "https://tony252.ccwu.cc"

@@ -9,6 +9,7 @@ import math
 import os
 import pathlib
 import re
+import socket
 import sys
 import tempfile
 import time
@@ -38,7 +39,7 @@ DECISION_IDENTITY_FIELDS = (
 )
 ALLOWED_GLOBAL_ACTIONS = {"NO_VALID_PICK", "REVIEW_EXECUTABLE_PICK"}
 ALLOWED_PRODUCTION_ACTIONS = {"NO_QUALIFIED_PICK", "QUALIFIED_PICK"}
-DEFAULT_BASE_URL = "https://xuangu.alixjd.com"
+DEFAULT_BASE_URL = "https://tony252.ccwu.cc"
 SHANGHAI_TIME_ZONE = ZoneInfo("Asia/Shanghai")
 NEW_YORK_TIME_ZONE = ZoneInfo("America/New_York")
 GITHUB_PRIMARY_UTC_SCHEDULES = (
@@ -88,6 +89,16 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
+class RemoteSnapshotUnavailable(OSError):
+    """Production does not publish a snapshot yet, so there is nothing to adopt.
+
+    A first deployment has no Worker route, no published assets and therefore
+    no remote snapshot.  That is an expected state for the very first deploy,
+    not a verification failure.  Any other HTTP or network failure must still
+    fail closed.
+    """
+
+
 def endpoint_url(base_url: str, path: str) -> str:
     return f"{base_url.rstrip('/')}/{path.lstrip('/')}"
 
@@ -116,6 +127,41 @@ def fetch_response(
 
 def fetch_json(url: str, *, timeout: float = 10) -> dict:
     status, headers, body = fetch_response(url, timeout=timeout)
+    return _decode_json_response(url, status, headers, body)
+
+
+def fetch_json_allow_missing(url: str, *, timeout: float = 10) -> dict:
+    """Fetch JSON, tolerating a not-yet-deployed production endpoint.
+
+    Only two conditions mean "production is not deployed yet":
+
+    * HTTP 404, i.e. the Worker answered but has no published snapshot.
+    * DNS resolution failure, i.e. the zone/record does not exist yet.
+
+    Every other HTTP status, timeout, TLS or connection error is raised so the
+    caller still fails closed.
+    """
+    try:
+        status, headers, body = fetch_response(url, timeout=timeout)
+    except urllib.error.URLError as exc:
+        if isinstance(getattr(exc, "reason", None), socket.gaierror):
+            raise RemoteSnapshotUnavailable(
+                f"{url} could not be resolved; production is not deployed yet"
+            ) from None
+        raise
+    if status == 404:
+        raise RemoteSnapshotUnavailable(
+            f"{url} returned HTTP 404; production has no published snapshot yet"
+        )
+    return _decode_json_response(url, status, headers, body)
+
+
+def _decode_json_response(
+    url: str,
+    status: int,
+    headers: Mapping[str, str],
+    body: bytes,
+) -> dict:
     if not 200 <= status < 300:
         details: list[str] = []
         ray = _header(headers, "cf-ray")
@@ -269,7 +315,20 @@ def adopt_newer_remote_snapshot(
     # Worker API parses and re-serializes the payload in JavaScript, which
     # normalizes integral floats such as 0.0 to 0 and invalidates canonical
     # hashes produced from the original Python JSON document.
-    remote = fetcher(endpoint_url(base_url, "/data/picks/latest.json"))
+    try:
+        remote = fetcher(endpoint_url(base_url, "/data/picks/latest.json"))
+    except RemoteSnapshotUnavailable:
+        # Nothing is published yet, so there is no production snapshot that
+        # could be newer than the local one.  Keep the local snapshot and let
+        # the first deployment publish it.
+        local_hash = snapshot_sha256(local)
+        return {
+            "adopted": False,
+            "snapshot_key": local.get("snapshot_key"),
+            "generated_at": local.get("generated_at"),
+            "sha256": local_hash,
+            "production_available": False,
+        }
     for field in IDENTITY_FIELDS + DECISION_IDENTITY_FIELDS:
         if remote.get(field) in (None, ""):
             raise ValueError(f"remote.{field} is missing; refusing stale-push reconciliation")
@@ -284,6 +343,7 @@ def adopt_newer_remote_snapshot(
             "snapshot_key": local.get("snapshot_key"),
             "generated_at": local.get("generated_at"),
             "sha256": local_hash,
+            "production_available": True,
         }
 
     # A same-timestamp mismatch is also treated as production-authoritative.
@@ -301,6 +361,7 @@ def adopt_newer_remote_snapshot(
         "snapshot_key": key,
         "generated_at": remote.get("generated_at"),
         "sha256": remote_hash,
+        "production_available": True,
     }
 
 
@@ -1751,13 +1812,14 @@ def main() -> None:
         result = adopt_newer_remote_snapshot(
             path,
             base_url=args.base_url,
-            fetcher=json_fetcher,
+            fetcher=lambda url: fetch_json_allow_missing(url, timeout=args.timeout_seconds),
         )
         print(
             "Production snapshot reconciliation: "
             f"adopted={str(result['adopted']).lower()} "
             f"snapshot_key={result['snapshot_key']} generated_at={result['generated_at']} "
-            f"sha256={result['sha256']}"
+            f"sha256={result['sha256']} "
+            f"production_available={str(result['production_available']).lower()}"
         )
         return
 

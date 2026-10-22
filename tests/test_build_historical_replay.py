@@ -178,9 +178,14 @@ class BuildHistoricalReplayScriptTests(unittest.TestCase):
             picks = root / "picks"
             output = root / "replay.json"
             picks.mkdir()
-            output.write_text(
-                json.dumps(artifact, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-                encoding="utf-8",
+            # Write bytes so the fixture matches the canonical LF-only
+            # rendering.  Text mode would translate "\n" to "\r\n" on
+            # Windows and break the byte-equality idempotency check.
+            output.write_bytes(
+                (
+                    json.dumps(artifact, ensure_ascii=False, indent=2, sort_keys=True)
+                    + "\n"
+                ).encode("utf-8")
             )
             with (
                 mock.patch.object(

@@ -361,12 +361,12 @@ git push origin HEAD:main
 - [ ] **Step 6: Trigger and monitor a manual production refresh**
 
 ```bash
-gh workflow run deploy-worker.yml --repo dzhdingzihang/xuangu --ref main
-gh run watch --repo dzhdingzihang/xuangu --exit-status
+gh workflow run deploy-worker.yml --repo tony252/xuangu --ref main
+gh run watch --repo tony252/xuangu --exit-status
 ```
 
 Verify the deployed commit, new snapshot identity, current freshness, candidate truth, all six tabs, console, and API response sizes. Do not call a stale rule-qualified row a current recommendation.
 
 - [ ] **Step 7: Enable Cloudflare scheduler only with a dedicated token**
 
-Create a fine-grained GitHub token restricted to `dzhdingzihang/xuangu` with only `Actions: write`, then store it as `GITHUB_WORKFLOW_DISPATCH_TOKEN` using Wrangler. Never reuse `QUOTE_GATEWAY_TOKEN`, `CLOUDFLARE_API_TOKEN`, or a broad local `gh` credential.
+Create a fine-grained GitHub token restricted to `tony252/xuangu` with only `Actions: write`, then store it as `GITHUB_WORKFLOW_DISPATCH_TOKEN` using Wrangler. Never reuse `QUOTE_GATEWAY_TOKEN`, `CLOUDFLARE_API_TOKEN`, or a broad local `gh` credential.

@@ -90,7 +90,7 @@ jobs:
         env:
           # Only deployed production state may suppress a recovery run. A
           # checked-out latest.json is not proof that deployment succeeded.
-          SCHEDULE_GATE_STATUS_URL: https://xuangu.alixjd.com/api/latest
+          SCHEDULE_GATE_STATUS_URL: https://tony252.ccwu.cc/api/latest
           SCHEDULE_GATE_CRON: ${{ github.event.schedule || inputs.cron }}
           SCHEDULE_GATE_SCHEDULED_AT: ${{ inputs.scheduled_at }}
 
@@ -125,7 +125,7 @@ jobs:
         if: github.event_name == 'push'
         run: >-
           python scripts/verify_deployment.py data/picks/latest.json
-          --base-url https://xuangu.alixjd.com
+          --base-url https://tony252.ccwu.cc
           --adopt-newer-live
 
       - name: Restore A-share daily K-line cache
@@ -226,7 +226,7 @@ jobs:
         if: steps.trigger_context.outputs.scheduled_like == 'true' && steps.schedule_gate.outputs.should_run == 'true'
         run: >-
           python scripts/deployment_order_guard.py data/picks/latest.json
-          --base-url https://xuangu.alixjd.com
+          --base-url https://tony252.ccwu.cc
 
       - name: Save validated A-share daily K-line cache
         if: (github.event_name == 'workflow_dispatch' && steps.trigger_context.outputs.scheduled_like != 'true') || steps.schedule_gate.outputs.should_run == 'true'
@@ -354,19 +354,55 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
-          npx --no-install wrangler deployments status --name xuangu --json \
-            > "${RUNNER_TEMP}/rollback-target-deployment.json"
+          # A first deployment has no Worker and therefore no version to roll
+          # back to.  Capture that state explicitly instead of failing the
+          # whole deployment before the Worker exists.  Every other Wrangler
+          # failure (authentication, missing script, network) is still fatal:
+          # silently treating it as "no previous version" would disable the
+          # rollback safety net on an already deployed Worker.
+          if npx --no-install wrangler deployments status --name xuangu-tony252 --json \
+            > "${RUNNER_TEMP}/rollback-target-deployment.json" 2> "${RUNNER_TEMP}/rollback-target-error.log"; then
+            :
+          else
+            # Wrangler v4 reports a missing Worker through several different
+            # shapes depending on the code path that failed, so the matcher has
+            # to cover all of them.  Every alternative below still means "there
+            # is no script to roll back to"; authentication, permission and
+            # network failures are deliberately absent so that they keep
+            # failing the deployment.
+            if grep -qiE 'script[_ .-]?not[_ .-]?found|workers\.api\.error\.script_not_found|workers\.script\.not_found|(^|[^0-9])10007([^0-9]|$)|has no deployments|no deployments|deployment not found|no such worker' \
+              "${RUNNER_TEMP}/rollback-target-error.log"; then
+              echo "No existing Worker deployment to roll back to; continuing with the first deployment."
+            else
+              echo "Unable to read the production deployment state; refusing to deploy without a rollback target." >&2
+              sed -E 's/[A-Za-z0-9_-]{20,}/***/g' "${RUNNER_TEMP}/rollback-target-error.log" >&2 || true
+              exit 1
+            fi
+            printf '{}\n' > "${RUNNER_TEMP}/rollback-target-deployment.json"
+          fi
           python - <<'PY'
           import json
           import os
           import pathlib
+          import socket
+          import urllib.error
           import urllib.request
           import uuid
 
           runner_temp = pathlib.Path(os.environ["RUNNER_TEMP"])
           deployment_path = runner_temp / "rollback-target-deployment.json"
-          deployment = json.loads(deployment_path.read_text(encoding="utf-8"))
+          raw = deployment_path.read_text(encoding="utf-8").strip()
+          deployment = json.loads(raw) if raw else {}
           versions = deployment.get("versions")
+          if not versions:
+              # First deployment: there is no previous version, so there is
+              # nothing to roll back to.  An empty version_id makes the
+              # rollback step a no-op instead of a failed deployment.
+              print("No production deployment exists yet; skipping rollback target capture.")
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+                  output.write("version_id=\n")
+                  output.write("has_version=false\n")
+              raise SystemExit(0)
           if not isinstance(versions, list):
               raise SystemExit("production deployment does not expose a versions list")
           if (
@@ -383,23 +419,45 @@ jobs:
               raise SystemExit(f"invalid rollback version id: {version_id!r}")
 
           request = urllib.request.Request(
-              "https://xuangu.alixjd.com/api/latest",
+              "https://tony252.ccwu.cc/api/latest",
               headers={
                   "Accept": "application/json",
                   "Cache-Control": "no-cache",
                   "User-Agent": "xuangu-deploy-rollback-capture/1.0",
               },
           )
-          with urllib.request.urlopen(request, timeout=15) as response:
-              snapshot = json.loads(response.read().decode("utf-8"))
-          if not isinstance(snapshot, dict) or not snapshot.get("snapshot_key"):
-              raise SystemExit("production rollback snapshot is unavailable")
-          (runner_temp / "rollback-target-latest.json").write_text(
-              json.dumps(snapshot, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
-              encoding="utf-8",
-          )
+          try:
+              with urllib.request.urlopen(request, timeout=15) as response:
+                  snapshot = json.loads(response.read().decode("utf-8"))
+          except urllib.error.HTTPError as exc:
+              if exc.code == 404:
+                  # The Worker exists but has not published a snapshot yet.
+                  # There is no public state to preserve, so the rollback
+                  # target is the previous version and nothing else.
+                  print("Production has no published snapshot yet; only the version is preserved.")
+                  snapshot = None
+              else:
+                  raise
+          except urllib.error.URLError as exc:
+              if isinstance(getattr(exc, "reason", None), socket.gaierror):
+                  # The route does not resolve yet, so production never
+                  # published a snapshot.
+                  print("Production route does not resolve yet; only the version is preserved.")
+                  snapshot = None
+              else:
+                  raise
+          if snapshot is None:
+              (runner_temp / "rollback-target-latest.json").write_text("{}\n", encoding="utf-8")
+          else:
+              if not isinstance(snapshot, dict) or not snapshot.get("snapshot_key"):
+                  raise SystemExit("production snapshot does not expose a snapshot_key")
+              (runner_temp / "rollback-target-latest.json").write_text(
+                  json.dumps(snapshot, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
+                  encoding="utf-8",
+              )
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               output.write(f"version_id={version_id}\n")
+              output.write("has_version=true\n")
           PY
 
       - name: Provision optional repository-scoped scheduler credential
@@ -423,23 +481,27 @@ jobs:
         if: (steps.trigger_context.outputs.scheduled_like != 'true' || steps.schedule_gate.outputs.should_run == 'true') && (steps.trigger_context.outputs.scheduled_like != 'true' || steps.publish_guard.outputs.should_publish == 'true')
         run: >-
           python scripts/verify_deployment.py public/data/picks/latest.json
-          --base-url https://xuangu.alixjd.com
+          --base-url https://tony252.ccwu.cc
           --attempts 8
           --delay-seconds 8
           --timeout-seconds 15
 
       - name: Roll back failed deployment attempt or verification
-        if: ${{ failure() && steps.rollback_target.outcome == 'success' && steps.deploy_worker.outcome != 'skipped' }}
+        if: ${{ failure() && steps.rollback_target.outcome == 'success' && steps.rollback_target.outputs.has_version == 'true' && steps.deploy_worker.outcome != 'skipped' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           EXPECTED_ROLLBACK_VERSION: ${{ steps.rollback_target.outputs.version_id }}
         run: |
           set -euo pipefail
+          if [ -z "${EXPECTED_ROLLBACK_VERSION}" ]; then
+            echo "No previous production version exists; nothing to roll back to."
+            exit 0
+          fi
           npx --no-install wrangler rollback "${EXPECTED_ROLLBACK_VERSION}" \
-            --name xuangu \
+            --name xuangu-tony252 \
             --yes \
             --message "rollback failed github:${{ github.sha }} run:${{ github.run_id }}"
-          npx --no-install wrangler deployments status --name xuangu --json \
+          npx --no-install wrangler deployments status --name xuangu-tony252 --json \
             > "${RUNNER_TEMP}/rollback-result-deployment.json"
           python - <<'PY'
           import json
@@ -470,11 +532,17 @@ jobs:
                   encoding="utf-8"
               )
           )
+          if not expected_snapshot.get("snapshot_key"):
+              # The previous version never published a snapshot, so there is
+              # no public identity to compare against.  The exact version
+              # restore above is already proven.
+              print("Rollback restored the exact previous version; no published snapshot existed before.")
+              raise SystemExit(0)
           expected_digest = snapshot_sha256(expected_snapshot)
           last_error = "rollback endpoint did not converge"
           for attempt in range(1, 9):
               try:
-                  live = fetch_json("https://xuangu.alixjd.com/api/latest", timeout=15)
+                  live = fetch_json("https://tony252.ccwu.cc/api/latest", timeout=15)
                   if (
                       live.get("snapshot_key") == expected_snapshot.get("snapshot_key")
                       and live.get("generated_at") == expected_snapshot.get("generated_at")

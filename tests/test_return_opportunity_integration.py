@@ -44,6 +44,14 @@ class ReturnOpportunityIntegrationTests(unittest.TestCase):
     def test_standalone_deployment_verifier_can_load_opportunity_publisher(self) -> None:
         verifier = pathlib.Path(server.__file__).parent / "scripts" / "verify_deployment.py"
         program = """
+import site, sys
+# Isolated mode (-I) drops the user site-packages directory, so a locally
+# installed tzdata package would be invisible to the verifier even though
+# the interpreter can import it.  Put the interpreter's own site-packages
+# back on the path explicitly; the repository is still never added.
+for _path in (*site.getsitepackages(), site.getusersitepackages()):
+    if _path and _path not in sys.path:
+        sys.path.append(_path)
 import runpy, sys
 namespace = runpy.run_path(sys.argv[1])
 errors = namespace['ui_api_contract_errors'](

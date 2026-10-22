@@ -122,10 +122,10 @@ Expected: 港股 200/200、美股 300/300，来源为动态市场快照，统计
 
 Run: `git add server.py static/app.js scripts/validate_snapshot.py scripts/schedule_gate.py .github/workflows/deploy-worker.yml tests README.md docs/superpowers/plans/2026-08-23-hk-us-dynamic-recall.md && git commit -m "feat: add dynamic HK and US recall"`
 
-Run: `git push git@github.com:dzhdingzihang/xuangu.git HEAD:main`
+Run: `git push git@github.com:tony252/xuangu.git HEAD:main`
 
 Expected: GitHub Actions 构建并发布 Cloudflare Worker。
 
 - [ ] **Step 4: 验证线上**
 
-检查 `https://xuangu.alixjd.com/api/latest`、`/api/status` 和页面，确认新版本、动态来源、目标计数、行情新鲜度和交互均正常。
+检查 `https://tony252.ccwu.cc/api/latest`、`/api/status` 和页面，确认新版本、动态来源、目标计数、行情新鲜度和交互均正常。

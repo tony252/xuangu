@@ -615,7 +615,7 @@ class WorkflowReliabilityTests(unittest.TestCase):
             "06:30",
             "40 分钟",
             "单轮行情请求",
-            "CLOUDFLARE_SCHEDULER_ENABLED=1",
+            "CLOUDFLARE_SCHEDULER_ENABLED",
             "GITHUB_WORKFLOW_DISPATCH_TOKEN",
             "Actions: write",
             "不能自动授权生产概率模型",
@@ -668,7 +668,7 @@ class WorkflowReliabilityTests(unittest.TestCase):
         self.assertNotIn('cron: "58 0,1,2,4,5,6,15 * * 1-5"', workflow)
         self.assertNotIn('cron: "28 1,2,3,5,6,7,16 * * 1-5"', workflow)
         self.assertIn("cancel-in-progress: false", workflow)
-        self.assertIn("SCHEDULE_GATE_STATUS_URL: https://xuangu.alixjd.com/api/latest", workflow)
+        self.assertIn("SCHEDULE_GATE_STATUS_URL: https://tony252.ccwu.cc/api/latest", workflow)
         self.assertIn("scheduler:", workflow)
         self.assertIn("cron:", workflow)
         self.assertIn("scheduled_at:", workflow)
@@ -842,7 +842,7 @@ class WorkflowReliabilityTests(unittest.TestCase):
 
     def test_failed_deployment_attempt_or_verification_rolls_back_exact_previous_version(self) -> None:
         workflow = WORKFLOW.read_text(encoding="utf-8")
-        capture = "npx --no-install wrangler deployments status --name xuangu --json"
+        capture = "npx --no-install wrangler deployments status --name xuangu-tony252 --json"
         deploy = "npx --no-install wrangler deploy\n          --message"
         verify = "Verify complete deployed contract"
         rollback = "npx --no-install wrangler rollback"
@@ -854,6 +854,7 @@ class WorkflowReliabilityTests(unittest.TestCase):
             rollback,
             "steps.rollback_target.outputs.version_id",
             "steps.rollback_target.outcome == 'success'",
+            "steps.rollback_target.outputs.has_version == 'true'",
             "steps.deploy_worker.outcome != 'skipped'",
             "--yes",
             "rollback-target-latest.json",
@@ -870,6 +871,103 @@ class WorkflowReliabilityTests(unittest.TestCase):
         self.assertLess(workflow.index(deploy), workflow.index(verify))
         self.assertLess(workflow.index(verify), workflow.index(rollback))
         self.assertGreaterEqual(workflow.count("python scripts/verify_deployment.py"), 2)
+
+    def test_first_deployment_has_no_rollback_target_and_skips_rollback(self) -> None:
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        capture = workflow[
+            workflow.index("      - name: Capture exact production rollback target") :
+            workflow.index("      - name: Provision optional repository-scoped scheduler credential")
+        ]
+        for token in (
+            "No existing Worker deployment to roll back to",
+            'output.write("version_id=\\n")',
+            'output.write("has_version=false\\n")',
+            "if not versions:",
+            "Production has no published snapshot yet",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, capture)
+
+        rollback = workflow[
+            workflow.index("      - name: Roll back failed deployment attempt or verification") :
+            workflow.index("      - name: Freeze verified published opportunity shortlist")
+        ]
+        self.assertIn('if [ -z "${EXPECTED_ROLLBACK_VERSION}" ]; then', rollback)
+        self.assertIn("nothing to roll back to", rollback)
+
+    def test_rollback_target_capture_fails_closed_on_unexpected_wrangler_errors(self) -> None:
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        capture = workflow[
+            workflow.index("      - name: Capture exact production rollback target") :
+            workflow.index("      - name: Provision optional repository-scoped scheduler credential")
+        ]
+        self.assertIn(
+            "Unable to read the production deployment state; refusing to deploy without a rollback target.",
+            capture,
+        )
+        self.assertIn("workers\\.script\\.not_found", capture)
+        # An existing Worker with a published snapshot must always persist the
+        # rollback snapshot, so a failed deployment can prove the restore.
+        self.assertIn('(runner_temp / "rollback-target-latest.json").write_text(', capture)
+        self.assertIn('(runner_temp / "rollback-target-latest.json").write_text("{}\\n", encoding="utf-8")', capture)
+        self.assertIn('output.write("has_version=true\\n")', capture)
+
+        rollback = workflow[
+            workflow.index("      - name: Roll back failed deployment attempt or verification") :
+            workflow.index("      - name: Freeze verified published opportunity shortlist")
+        ]
+        self.assertIn(
+            'if not expected_snapshot.get("snapshot_key"):',
+            rollback,
+        )
+
+    def test_first_deployment_matcher_covers_wrangler_v4_missing_script_shapes(self) -> None:
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        capture = workflow[
+            workflow.index("      - name: Capture exact production rollback target") :
+            workflow.index("      - name: Provision optional repository-scoped scheduler credential")
+        ]
+        match = re.search(
+            r"if grep -qiE '([^']+)'",
+            capture,
+        )
+        self.assertIsNotNone(match, "the rollback target capture must classify missing scripts")
+        pattern = re.compile(match.group(1), re.IGNORECASE)
+
+        # Every shape Wrangler uses to report "the Worker does not exist yet"
+        # must be treated as a first deployment.
+        for sample in (
+            "workers.api.error.script_not_found",
+            "workers.script.not_found",
+            "script not found",
+            "script-not-found",
+            "script_not_found",
+            "script.not found",
+            "Error: 10007: workers.api.error.script_not_found",
+            "code: 10007",
+            "The Worker xuangu-tony252 has no deployments",
+            "no deployments found for this Worker",
+            "deployment not found",
+            "no such worker",
+        ):
+            with self.subTest(sample=sample):
+                self.assertTrue(pattern.search(sample))
+
+        # Authentication, permission, network and generic server failures must
+        # never be mistaken for a first deployment, otherwise the rollback
+        # safety net would be silently disabled on a live Worker.
+        for sample in (
+            "Invalid API token provided: 1000",
+            "Authentication error [code: 10000]",
+            "You are not authorized to perform this action (code: 9109)",
+            "error sending request for url (https://api.cloudflare.com/client/v4/...)",
+            "connection timed out",
+            "internal server error (code: 100001)",
+            "A request to the Cloudflare API failed. (code: 1000)",
+            "request id 100077 does not exist",
+        ):
+            with self.subTest(sample=sample):
+                self.assertIsNone(pattern.search(sample))
 
     def test_all_static_requests_run_through_worker_security_contract(self) -> None:
         config = json.loads(WRANGLER.read_text(encoding="utf-8"))
@@ -1462,6 +1560,53 @@ class DeploymentVerifierTests(unittest.TestCase):
             )
             self.assertTrue(result["adopted"])
             self.assertEqual(json.loads(latest_path.read_text()), remote)
+
+    def test_push_guard_treats_missing_production_snapshot_as_first_deployment(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            latest_path = pathlib.Path(temporary) / "data" / "picks" / "latest.json"
+            latest_path.parent.mkdir(parents=True)
+            latest_path.write_text(json.dumps(self.local), encoding="utf-8")
+
+            def missing(url: str) -> dict:
+                raise self.module.RemoteSnapshotUnavailable(
+                    f"{url} returned HTTP 404; production has no published snapshot yet"
+                )
+
+            result = self.module.adopt_newer_remote_snapshot(
+                latest_path,
+                base_url="https://selector.example.test",
+                fetcher=missing,
+            )
+            self.assertFalse(result["adopted"])
+            self.assertFalse(result["production_available"])
+            self.assertEqual(result["snapshot_key"], self.local["snapshot_key"])
+            self.assertEqual(json.loads(latest_path.read_text()), self.local)
+            self.assertFalse(
+                (latest_path.parent / self.local["snapshot_key"]).exists(),
+                "a first deployment must not invent an immutable snapshot file",
+            )
+
+    def test_fetch_json_allow_missing_only_tolerates_not_found(self) -> None:
+        with mock.patch.object(
+            self.module,
+            "fetch_response",
+            return_value=(404, {}, b""),
+        ):
+            with self.assertRaises(self.module.RemoteSnapshotUnavailable):
+                self.module.fetch_json_allow_missing(
+                    "https://selector.example.test/data/picks/latest.json"
+                )
+
+        with mock.patch.object(
+            self.module,
+            "fetch_response",
+            return_value=(503, {"CF-Ray": "abc123-SIN"}, b"boom"),
+        ):
+            with self.assertRaises(OSError) as captured:
+                self.module.fetch_json_allow_missing(
+                    "https://selector.example.test/data/picks/latest.json"
+                )
+        self.assertNotIsInstance(captured.exception, self.module.RemoteSnapshotUnavailable)
 
     def test_live_verifier_rejects_realtime_claim_and_snapshot_identity_mismatch(self) -> None:
         quote = self.local["markets"]["us"]["decision"]["primary"]["realtime"]

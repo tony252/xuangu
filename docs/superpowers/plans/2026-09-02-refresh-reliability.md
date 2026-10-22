@@ -68,6 +68,6 @@
 - [x] Run focused impacted suites (238 tests), `node --check static/app.js`, `node --check src/index.js`, Python compile checks, and `git diff --check`.
 - [ ] Build the Worker assets using the repository build command and verify the working tree contains only intended source/generated changes.
 - [ ] Commit the repair on top of the latest remote `main`, rebase if an automated data commit landed concurrently, and push to GitHub.
-- [ ] Wait for the deployment workflow and verify `https://xuangu.alixjd.com/api/status` and `https://xuangu.alixjd.com/api/latest-summary` return matching snapshot identities with no-cache headers.
+- [ ] Wait for the deployment workflow and verify `https://tony252.ccwu.cc/api/status` and `https://tony252.ccwu.cc/api/latest-summary` return matching snapshot identities with no-cache headers.
 - [ ] Confirm `cloudflare_dispatch_enabled`, scheduler readiness, and the next active refresh values reflect the deployed independent scheduler.
 - [ ] Trigger or observe one Cloudflare-originated workflow dispatch and verify it publishes or intentionally deduplicates the expected checkpoint.

@@ -27,7 +27,7 @@ class SchedulerDispatchReliabilityTests(unittest.TestCase):
         assert.equal(result.attempts, 3);
         assert.deepEqual(sleeps, [1000, 2000]);
         for (const {url, init} of requests) {
-          assert.equal(url, 'https://api.github.com/repos/dzhdingzihang/xuangu/actions/workflows/deploy-worker.yml/dispatches');
+          assert.equal(url, 'https://api.github.com/repos/tony252/xuangu/actions/workflows/deploy-worker.yml/dispatches');
           assert.equal(JSON.parse(init.body).inputs.cron, '47 0 * * 1-5');
           assert.ok(init.signal);
         }
@@ -48,9 +48,13 @@ class SchedulerDispatchReliabilityTests(unittest.TestCase):
                                 cwd=ROOT, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_configured_cloudflare_uses_one_shared_account_cron(self):
+    def test_cloudflare_cron_is_disabled_because_github_actions_is_the_only_scheduler(self):
         config = json.loads((ROOT / "wrangler.jsonc").read_text())
-        self.assertEqual(config["triggers"]["crons"], ["17,47 0,2,4,7,8,12,14,15,20,21 * * MON-FRI"])
+        self.assertNotIn("triggers", config)
+        self.assertEqual(config["vars"]["CLOUDFLARE_SCHEDULER_ENABLED"], "0")
+        self.assertEqual(config["name"], "xuangu-tony252")
+        self.assertEqual(config["routes"][0]["pattern"], "tony252.ccwu.cc/*")
+        self.assertEqual(config["routes"][0]["zone_name"], "tony252.ccwu.cc")
 
     def test_single_cron_preserves_every_summer_and_winter_slot_without_extra_dispatches(self):
         script = """

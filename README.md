@@ -1,8 +1,8 @@
 # XuanGu · 智能选股
 
-[![Deploy Cloudflare Worker](https://github.com/dzhdingzihang/xuangu/actions/workflows/deploy-worker.yml/badge.svg)](https://github.com/dzhdingzihang/xuangu/actions/workflows/deploy-worker.yml)
+[![Deploy Cloudflare Worker](https://github.com/tony252/xuangu/actions/workflows/deploy-worker.yml/badge.svg)](https://github.com/tony252/xuangu/actions/workflows/deploy-worker.yml)
 
-[线上站点](https://xuangu.alixjd.com) · [服务状态](https://xuangu.alixjd.com/api/status) · [最新快照](https://xuangu.alixjd.com/api/latest) · [运行记录](https://github.com/dzhdingzihang/xuangu/actions)
+[线上站点](https://tony252.ccwu.cc) · [服务状态](https://tony252.ccwu.cc/api/status) · [最新快照](https://tony252.ccwu.cc/api/latest) · [运行记录](https://github.com/tony252/xuangu/actions)
 
 XuanGu 是一个面向未来约两周（10 个交易日）的 A 股、港股、美股智能选股研究系统。它将候选召回、行情校验、因子评分、深度研究、事件证据、风险门禁和历史检验放进同一条可审计流水线，围绕**未来 10 个交易日的扣费后收益，筛选值得优先研究、能够说明依据和入场限制的股票**。当前首页仍是可解释的规则研究排序，不是已经验证能预测“未来涨最多”的模型；能正常发布候选与已经证明选股有效，是两项不同的验收。
 
@@ -24,7 +24,7 @@ XuanGu 是一个面向未来约两周（10 个交易日）的 A 股、港股、�
 
 ### 2026-09-11 V3 发布验收记录
 
-[云端全量生成和发布 #34592430032](https://github.com/dzhdingzihang/xuangu/actions/runs/34592430032) 成功，发布后完整合同校验通过。核验快照为 `2026-09-11_2026-09-11_191132.json`，生成于北京时间 **19:11:32**，不是以后批次的保证：
+[云端全量生成和发布 #34592430032](https://github.com/tony252/xuangu/actions/runs/34592430032) 成功，发布后完整合同校验通过。核验快照为 `2026-09-11_2026-09-11_191132.json`，生成于北京时间 **19:11:32**，不是以后批次的保证：
 
 - A 股召回 / 有效行情 / 技术评分 **300 / 300 / 300**，实际深研 **295**；只有通过交易性及技术门槛的候选进入深研，没有人为保留 96 只上限。
 - 港股召回 / 有效行情 / 深研 **200 / 200 / 200**；美股 **300 / 300 / 300**。两者真实源时钟新鲜计数分别为 200、300，三市场池健康。
@@ -39,7 +39,7 @@ XuanGu 是一个面向未来约两周（10 个交易日）的 A 股、港股、�
 
 以下是 **v2 的历史验收记录**，保留用于追溯，不是当前代码 v3 的生产覆盖数量。新代码不会把旧快照重写成新版本；实际在用的 `score_version`、数据时间、覆盖数量和更新健康度以线上 API 与当批验收为准。
 
-[云端生成和发布任务 #34483954602](https://github.com/dzhdingzihang/xuangu/actions/runs/34483954602) 已通过部署后合同校验。该批快照生成于北京时间 **21:43:33**，使用 `return-opportunity-score-v2`，评估 A 股 300、港股 195、美股 300 只，研究入围 198 只，展示 12 只机会。该记录是一次验收结果，不代表以后批次的数据。
+[云端生成和发布任务 #34483954602](https://github.com/tony252/xuangu/actions/runs/34483954602) 已通过部署后合同校验。该批快照生成于北京时间 **21:43:33**，使用 `return-opportunity-score-v2`，评估 A 股 300、港股 195、美股 300 只，研究入围 198 只，展示 12 只机会。该记录是一次验收结果，不代表以后批次的数据。
 
 - 新鲜供应商分类覆盖 **782 / 795（98.36%）**；13 只缺失分类继续明示，不根据股票名称猜行业。
 - 展示的 12 只机会均已完成本轮指定官方来源扫描；全评估池为成功 89、失败 1、未扫描 705。查询成功不等于已经排除全部负面风险。
@@ -445,7 +445,7 @@ Python 选股程序不会在 Worker 或浏览器请求中重算。页面初始�
 
 独立触发配置成功后，Cloudflare Cron 与 GitHub 原生 `schedule` 可在同一检查点分别发起调用；Workflow 的并发锁与 `schedule_gate` 以线上完整快照去重，先完成的健康发布会让后续调用跳过。GitHub 还在每个检查点 30 分钟后运行 watchdog：北京时间 `08:47 / 10:47 / 12:47 / 15:47 / 16:47 / 20:47 / 23:17`，纽约收盘后 `16:47`（北京夏令时 `04:47`、冬令时 `05:47`）。watchdog 会先核对线上完整快照；目标检查点已健康覆盖时直接跳过，不会重复生成。
 
-仓库已将 `CLOUDFLARE_SCHEDULER_ENABLED=1`，使 Cloudflare Cron 成为独立检查点触发器；Worker 只有在同时配置专用最小权限 `GITHUB_WORKFLOW_DISPATCH_TOKEN` 时才会实际 dispatch。版本库开关不证明生产 secret 已存在，缺少 secret 时 Cloudflare 路径会明确显示为未就绪，但不会阻止部署，也不会关闭 GitHub 原生 `schedule` 与 watchdog 降级链路。`/api/status.next_refresh` 与数据健康 Tab 应按检查点、watchdog 及纽约夏/冬令时计算，并独立展示 Cloudflare dispatch 是否真正可用。
+本部署把 `CLOUDFLARE_SCHEDULER_ENABLED` 设为 `0`，并删除了 `wrangler.jsonc` 中的 `triggers.crons`：GitHub Actions 原生 `schedule` 与 30 分钟 watchdog 是唯一调度器，Cloudflare Worker 只负责被调用和对外提供数据。这样定时行为完全由 GitHub Actions 的仓库配置决定，不依赖任何 Cloudflare 侧 token 或 cron 配额。`/api/status.next_refresh` 与数据健康 Tab 仍按检查点、watchdog 及纽约夏/冬令时计算。
 
 每次实际 cron 都记录来源调用点、逻辑检查点、开始延迟、恢复模式和生成时间；对应审计字段包括 `source_invocation_slot`、`scheduled_invocation_slot` 与 `scheduler_delay_seconds`。发布前按“调用点 + 生成时间”做单调校验，迟到旧任务不能覆盖新批次。普通延迟仍在原调用点的 4 小时窗口内处理；超过窗口时进入有界 `late_cron_recovery`，有效恢复调用点最多 12 小时。`schedule_gate.py` 只用线上完整 `/api/latest` 作为“已成功发布”证据：线上不可达、目标批次缺失/失败，或行情/候选池处于可恢复降级时继续运行。门禁硬校验 A/港/美实际召回达到 `300 / 200 / 300`，并检查动态来源、行情、A 股基础/技术评分及深研覆盖；仓库里的 `latest.json` 不能单独抑制刷新，因为它不证明 Cloudflare 已经切换成功。
 
@@ -550,7 +550,7 @@ GET /api/live?market=us&code=PWR
 要求 Python 3.12、Node.js 22。
 
 ```bash
-git clone https://github.com/dzhdingzihang/xuangu.git
+git clone https://github.com/tony252/xuangu.git
 cd xuangu
 python3 -m pip install -r requirements.txt
 npm ci
@@ -581,19 +581,18 @@ npm run dev
 ### GitHub / Cloudflare Secrets
 
 - `CLOUDFLARE_API_TOKEN`：Worker 部署权限。
-- `XUANGU_WORKFLOW_DISPATCH_TOKEN`：可选 GitHub Actions Secret。只选择 `dzhdingzihang/xuangu` 仓库、授予 `Actions: write` 的 fine-grained token；发布工作流通过标准输入写入 Worker 的 `GITHUB_WORKFLOW_DISPATCH_TOKEN`，不输出令牌、不从本机自动发现凭据，也拒绝 OAuth/经典 PAT。缺失时保留 GitHub 原生调度并明确报告独立触发未配置。令牌到期需在仓库 Secret 中替换后重新部署。
-- Cloudflare 定时 `workflow_dispatch` 是可选的独立检查点触发路径，仓库配置为 `CLOUDFLARE_SCHEDULER_ENABLED=1`。这只启用代码路径，不代表生产 secret 已配置；必须为仓库 `dzhdingzihang/xuangu` 单独创建只有 `Actions: write` 的 fine-grained token，并以 Wrangler secret `GITHUB_WORKFLOW_DISPATCH_TOKEN` 保存。不得复用 `CLOUDFLARE_API_TOKEN`、任何行情密钥或本地 `gh` 的宽权限凭证。GitHub Actions 原生 `schedule` 主调度与 30 分钟 watchdog 不使用该开关或 token，因此 secret 缺失不会令部署失败，仍由 GitHub 主链路刷新；但数据健康状态必须明确报告 Cloudflare dispatch 未就绪。Worker 只接受白名单表达式，并在运行时跳过不匹配纽约 `16:17` 的 DST 变体。
+- `XUANGU_WORKFLOW_DISPATCH_TOKEN`：本部署不需要。Cloudflare Cron 路径已关闭（`CLOUDFLARE_SCHEDULER_ENABLED=0`），仓库只使用 GitHub Actions 原生 `schedule` 与 30 分钟 watchdog 调度。若日后要恢复独立触发路径，必须为仓库 `tony252/xuangu` 单独创建只有 `Actions: write` 的 fine-grained token，并以 Wrangler secret `GITHUB_WORKFLOW_DISPATCH_TOKEN` 保存；不得复用 `CLOUDFLARE_API_TOKEN` 或任何宽权限凭证。
 - R2 当前未启用，内嵌同代资产是正式生产数据后端。现阶段不得设置 `ENABLE_R2_DATA_PUBLISH=1`；Workflow 会在 alias 切换前失败关闭并主动拒绝该配置。如果未来由 R2 manifest 供应数据，某个 R2 object 的内嵌回退也只接受同 generation 且 key / SHA-256 / 字节数一致的副本，不会把 R2 缺口静默降级为跨代数据。启用前必须补齐 alias 与 Worker Version 的原子切换、联合回滚与线上故障演练。
 - 定时选股不需要 OpenD、Tunnel、Render 或个人设备密钥。
-- Cloudflare 使用一个合并的定时入口，运行时过滤未配置时点及不匹配纽约盘后的夏冬令时变体，实际主检查点与 30 分钟 watchdog 不变。免费配额由整个账号共享；本项目不占满全部定时入口，也不要求升级付费套餐。
+- 本部署不使用 Cloudflare Cron 定时入口，主检查点与 30 分钟 watchdog 完全由 GitHub Actions `schedule` 承担，因此不占用 Cloudflare 免费定时配额。
 
 ### 部署 Worker
 
 推送 `main` 会测试、构建并部署仓库已有快照；`schedule` 或 `workflow_dispatch` 会先生成新快照、更新账本再部署。
 
 ```bash
-gh workflow run deploy-worker.yml --repo dzhdingzihang/xuangu --ref main
-gh run list --repo dzhdingzihang/xuangu --workflow deploy-worker.yml --limit 5
+gh workflow run deploy-worker.yml --repo tony252/xuangu --ref main
+gh run list --repo tony252/xuangu --workflow deploy-worker.yml --limit 5
 ```
 
 直接部署只适合运维排障，正式发布仍应以 GitHub Actions 的完整验证链为准：
@@ -607,15 +606,15 @@ npx wrangler deploy
 ### 线上验收
 
 ```bash
-curl -fsS https://xuangu.alixjd.com/api/status
-curl -fsS https://xuangu.alixjd.com/api/latest-summary
-curl -fsS 'https://xuangu.alixjd.com/api/history?view=daily&limit=5'
-curl -fsSI https://xuangu.alixjd.com/
+curl -fsS https://tony252.ccwu.cc/api/status
+curl -fsS https://tony252.ccwu.cc/api/latest-summary
+curl -fsS 'https://tony252.ccwu.cc/api/history?view=daily&limit=5'
+curl -fsSI https://tony252.ccwu.cc/
 ```
 
 验收 `/api/status` 时应确认 `snapshot_generation=github-actions`、`data_mode=scheduled_snapshot`、`device_dependency=false`、`snapshot_as_of`、`active_refresh_mode`、`next_refresh`，以及 `research_decision_ready`、`checkpoint_evidence_ready`、`unattended_refresh_ready`、`calibrated_execution_ready` 四层状态。调度路径应表达为 GitHub 原生 `schedule` 主调度 + 30 分钟 watchdog；配置专用凭据后再启用 Cloudflare 独立补充触发。Cloudflare 开关/token 状态必须独立展示，不能把仅有版本库开关误报为 dispatch 已可用。同时检查 `/api/gate-status` 的 snapshot identity、发布后端、receipt 证据滞后批次和 24 小时 ledger 状态；初始窗口显示 `INITIALIZING` 是预期状态。如果检查 `/api/live` 兼容路由，预期 `provider_class=SCHEDULED_SNAPSHOT` 与 `is_realtime=false`，不应期待 `REALTIME`。
 
-`xuangu.alixjd.com` 的生产页面、API 和定时更新均不依赖 Render、OpenD 或个人电脑。
+`tony252.ccwu.cc` 的生产页面、API 和定时更新均不依赖 Render、OpenD 或个人电脑。
 
 ## 生产边界与下一步
 
