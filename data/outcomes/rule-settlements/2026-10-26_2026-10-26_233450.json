@@ -1,0 +1,16 @@
+{
+  "authorizes_production": false,
+  "batch_sha256": "111be6e25ea3763d475e489d1eef60c10559063437e11a860c65fd9e99d52a56",
+  "evaluated_at": "2026-10-26T15:40:42+00:00",
+  "generated_at": "2026-10-26T23:34:50+08:00",
+  "outcomes": [],
+  "prediction_count": 0,
+  "prediction_ids": [],
+  "predictions": [],
+  "schema_version": "rule-outcome-batch-v1",
+  "signal_date": "2026-10-26",
+  "snapshot_key": "2026-10-26_2026-10-26_233450.json",
+  "status": "EMPTY",
+  "status_counts": {},
+  "track": "RULE_QUALIFICATION"
+}
