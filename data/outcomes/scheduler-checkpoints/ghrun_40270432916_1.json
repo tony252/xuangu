@@ -1,0 +1,23 @@
+{
+  "contract_version": "scheduler-checkpoint-receipt-v1",
+  "effective_checkpoint": "2026-10-26T12:17:00+08:00",
+  "effective_invocation_slot": "2026-10-26T12:17:00+08:00",
+  "generated_at": "2026-10-26T12:44:48+08:00",
+  "publication_backend": "embedded",
+  "publication_status": "PUBLISHED",
+  "published_at": "2026-10-26T04:58:18+00:00",
+  "receipt_id": "ghrun_40270432916_1",
+  "receipt_sha256": "def8d1d5126fe270146e80b32a7487c20b7342d503148b368b3eb2cb96b628d0",
+  "recovery_mode": "late_cron_recovery",
+  "scheduler_provider": "github_actions",
+  "scheduler_start_delay_seconds": 15945,
+  "snapshot_key": "2026-10-26_2026-10-23_124448.json",
+  "snapshot_sha256": "eacf098b87b689bb45ec0168ecccf90aae3fdb56742c31f2639ff82cf6a75f80",
+  "source_invocation_slot": "2026-10-26T08:17:00+08:00",
+  "trigger": "schedule",
+  "verification_method": "complete_deployment_contract_v1",
+  "verified_at": "2026-10-26T04:58:18+00:00",
+  "workflow_run_attempt": 1,
+  "workflow_run_id": "40270432916",
+  "workflow_sha": "be62ec9d1fc35ca3a7640134630d8052ab4478e0"
+}
