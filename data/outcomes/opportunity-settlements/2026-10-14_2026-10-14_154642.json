@@ -1,8 +1,8 @@
 {
   "authorizes_production": false,
-  "batch_sha256": "2b72e38d02a7b8fa164da10017bd375770b095add15956e89958179f3469af7e",
+  "batch_sha256": "63b2ac62f94b0574294050ad6714aac8caa5aaf3b00d86af1803d1c680e8a9fd",
   "calibrated": false,
-  "evaluated_at": "2026-10-14T07:57:10+00:00",
+  "evaluated_at": "2026-10-28T00:01:22.061582+00:00",
   "outcomes": [
     {
       "authorizes_production": false,
@@ -239,13 +239,13 @@
       "market_rank": 1,
       "name": "Palantir Technologies Inc-A",
       "opportunity_score": 79.68,
-      "outcome_sha256": "14ef630f566cd7d76658f6b976afc7e51037fbf62c5d31e95a6285fd3717d897",
+      "outcome_sha256": "43a558b646beabdd37a8f9f57e838e043f556dedf28c91ce32f07e6d37435fc8",
       "prediction_id": "opppred_42537e47cc0a3da18a40278a",
       "prediction_sha256": "2b7d6db9564dca70af95068b60980f30802fdbf6c7597ac7ff0536af5cb91bea",
       "publication_time_basis": "FIRST_VERIFIED_PUBLICATION",
       "published_at": "2026-10-14T07:57:10+00:00",
       "rank": 3,
-      "reason_code": "FORECAST_WINDOW_OPEN",
+      "reason_code": "COMPLETE_ADJUSTED_WINDOW_MISSING",
       "schema_version": "opportunity-outcome-v1",
       "score_identity": {
         "contract_version": "return-opportunities-v1",
@@ -293,7 +293,7 @@
       "score_version_id": "oppscore_da86bf6dddb4d96e161a0277",
       "snapshot_key": "2026-10-14_2026-10-14_154642.json",
       "source_snapshot_sha256": "c186e40f00e45b6d61227bd28472c5858879229daab63aa2e1cab15542eb6f60",
-      "status": "PENDING_MATURITY",
+      "status": "PENDING_DATA",
       "track": "RETURN_OPPORTUNITY",
       "transaction_cost": 0.0015,
       "transaction_cost_version": "market-round-trip-cost-v1"
@@ -336,13 +336,13 @@
       "market_rank": 2,
       "name": "VTEX-A",
       "opportunity_score": 78.83,
-      "outcome_sha256": "8cfa16f42f8318376bdb05ff7c949b743f29a34dc3295c3f3b112760a4aaa4e3",
+      "outcome_sha256": "fc19dd13689b2392b8666a47848ce8f7cb41d32ce28059cb20ee2ed1732e50c6",
       "prediction_id": "opppred_2d659a97f7e1a89a1ca0fdca",
       "prediction_sha256": "1d24ff45fef1011e404fe9eba7601901b6262103d9bacf5e92c50080330512c7",
       "publication_time_basis": "FIRST_VERIFIED_PUBLICATION",
       "published_at": "2026-10-14T07:57:10+00:00",
       "rank": 4,
-      "reason_code": "FORECAST_WINDOW_OPEN",
+      "reason_code": "COMPLETE_ADJUSTED_WINDOW_MISSING",
       "schema_version": "opportunity-outcome-v1",
       "score_identity": {
         "contract_version": "return-opportunities-v1",
@@ -390,7 +390,7 @@
       "score_version_id": "oppscore_da86bf6dddb4d96e161a0277",
       "snapshot_key": "2026-10-14_2026-10-14_154642.json",
       "source_snapshot_sha256": "c186e40f00e45b6d61227bd28472c5858879229daab63aa2e1cab15542eb6f60",
-      "status": "PENDING_MATURITY",
+      "status": "PENDING_DATA",
       "track": "RETURN_OPPORTUNITY",
       "transaction_cost": 0.0015,
       "transaction_cost_version": "market-round-trip-cost-v1"
@@ -630,13 +630,13 @@
       "market_rank": 3,
       "name": "森科能源",
       "opportunity_score": 77.09,
-      "outcome_sha256": "e4dd2f377028801d5bc74c9871ca3ff552ed3ed091e60b3a0988a875369eae8d",
+      "outcome_sha256": "473ea5a02896c2010a408e8c61c35086dc786b0ddf86d40ebc3ec441c6fb4d6b",
       "prediction_id": "opppred_f128ca7199ecde5658a800ec",
       "prediction_sha256": "551365012a09a15352c50b4ae8b639c1df615b5257982adefa2bf0116705f195",
       "publication_time_basis": "FIRST_VERIFIED_PUBLICATION",
       "published_at": "2026-10-14T07:57:10+00:00",
       "rank": 7,
-      "reason_code": "FORECAST_WINDOW_OPEN",
+      "reason_code": "COMPLETE_ADJUSTED_WINDOW_MISSING",
       "schema_version": "opportunity-outcome-v1",
       "score_identity": {
         "contract_version": "return-opportunities-v1",
@@ -684,7 +684,7 @@
       "score_version_id": "oppscore_da86bf6dddb4d96e161a0277",
       "snapshot_key": "2026-10-14_2026-10-14_154642.json",
       "source_snapshot_sha256": "c186e40f00e45b6d61227bd28472c5858879229daab63aa2e1cab15542eb6f60",
-      "status": "PENDING_MATURITY",
+      "status": "PENDING_DATA",
       "track": "RETURN_OPPORTUNITY",
       "transaction_cost": 0.0015,
       "transaction_cost_version": "market-round-trip-cost-v1"
@@ -1021,13 +1021,13 @@
       "market_rank": 4,
       "name": "易趣",
       "opportunity_score": 75.38,
-      "outcome_sha256": "17de19648a6f201844815f4659c01f8552729db1bed5bb4d0f2253c703f0b8b0",
+      "outcome_sha256": "d79114cdcabc0e51920ba0c5bff14bff48f261ffcab8623e3bc1d70ad79b9218",
       "prediction_id": "opppred_80bcbe7bcc760e59fffc3c3e",
       "prediction_sha256": "d2b20d331930d75eb3404b41e84baac3963a0225ded365e44fbd6a177adb6ec3",
       "publication_time_basis": "FIRST_VERIFIED_PUBLICATION",
       "published_at": "2026-10-14T07:57:10+00:00",
       "rank": 11,
-      "reason_code": "FORECAST_WINDOW_OPEN",
+      "reason_code": "COMPLETE_ADJUSTED_WINDOW_MISSING",
       "schema_version": "opportunity-outcome-v1",
       "score_identity": {
         "contract_version": "return-opportunities-v1",
@@ -1075,7 +1075,7 @@
       "score_version_id": "oppscore_da86bf6dddb4d96e161a0277",
       "snapshot_key": "2026-10-14_2026-10-14_154642.json",
       "source_snapshot_sha256": "c186e40f00e45b6d61227bd28472c5858879229daab63aa2e1cab15542eb6f60",
-      "status": "PENDING_MATURITY",
+      "status": "PENDING_DATA",
       "track": "RETURN_OPPORTUNITY",
       "transaction_cost": 0.0015,
       "transaction_cost_version": "market-round-trip-cost-v1"
@@ -1118,13 +1118,13 @@
       "market_rank": 5,
       "name": "Bloomin’ Brands Inc",
       "opportunity_score": 75.35,
-      "outcome_sha256": "7f73e128cadd7010f713202b00b39d0c383d8ec6df3b0b11711ffcf778e54aab",
+      "outcome_sha256": "3b8d810469af259678c54b112044587dfb8858be155baa0805446a40305b2cf3",
       "prediction_id": "opppred_1fa93af2bc5f505df9ab9df4",
       "prediction_sha256": "aabbddd02bbebe62e6a565b322d3072cb88f2396f92b9d20f3dd4194d4cc8d46",
       "publication_time_basis": "FIRST_VERIFIED_PUBLICATION",
       "published_at": "2026-10-14T07:57:10+00:00",
       "rank": 12,
-      "reason_code": "FORECAST_WINDOW_OPEN",
+      "reason_code": "COMPLETE_ADJUSTED_WINDOW_MISSING",
       "schema_version": "opportunity-outcome-v1",
       "score_identity": {
         "contract_version": "return-opportunities-v1",
@@ -1172,7 +1172,7 @@
       "score_version_id": "oppscore_da86bf6dddb4d96e161a0277",
       "snapshot_key": "2026-10-14_2026-10-14_154642.json",
       "source_snapshot_sha256": "c186e40f00e45b6d61227bd28472c5858879229daab63aa2e1cab15542eb6f60",
-      "status": "PENDING_MATURITY",
+      "status": "PENDING_DATA",
       "track": "RETURN_OPPORTUNITY",
       "transaction_cost": 0.0015,
       "transaction_cost_version": "market-round-trip-cost-v1"
@@ -2385,9 +2385,10 @@
   "schema_version": "opportunity-outcome-batch-v1",
   "snapshot_key": "2026-10-14_2026-10-14_154642.json",
   "source_snapshot_sha256": "c186e40f00e45b6d61227bd28472c5858879229daab63aa2e1cab15542eb6f60",
-  "status": "PENDING_MATURITY",
+  "status": "PARTIAL",
   "status_counts": {
-    "PENDING_MATURITY": 12
+    "PENDING_DATA": 5,
+    "PENDING_MATURITY": 7
   },
   "track": "RETURN_OPPORTUNITY"
 }
