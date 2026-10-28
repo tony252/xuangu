@@ -19,18 +19,18 @@ on:
     - cron: "17 21 * * 1-5"
     # Thirty-minute GitHub watchdogs repair a primary checkpoint only when the
     # complete production snapshot does not already cover it.
-    - cron: "47 0 * * 1-5"
-    - cron: "47 2 * * 1-5"
-    - cron: "47 4 * * 1-5"
-    - cron: "47 7 * * 1-5"
-    - cron: "47 8 * * 1-5"
-    - cron: "47 12 * * 1-5"
+    # - cron: "47 0 * * 1-5"
+    # - cron: "47 2 * * 1-5"
+    # - cron: "47 4 * * 1-5"
+    # - cron: "47 7 * * 1-5"
+    # - cron: "47 8 * * 1-5"
+    # - cron: "47 12 * * 1-5"
     # Beijing 23:17 fallback for the 22:47 US-open checkpoint.
     - cron: "17 15 * * 1-5"
     # 30-minute US post-close watchdogs. schedule_gate skips the expression
     # that is inactive for the current America/New_York DST offset.
-    - cron: "47 20 * * 1-5"
-    - cron: "47 21 * * 1-5"
+    # -  cron: "47 20 * * 1-5"
+    # - cron: "47 21 * * 1-5"
   workflow_dispatch:
     inputs:
       scheduler:
